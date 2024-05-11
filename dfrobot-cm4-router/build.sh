@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/bash -x
 # MIT License
 #
-# Copyright (c) 2019 fullburnen <fullburnen@protonmail.com>
+# Copyright (c) 2024 fullburnen <fullburnen@protonmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,28 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#Image source directory
-SLIDESHOW_PATH="/home/pi/slideshow"
-#Local images or from the network
-NETWORK=1
-#Image transition delay
-DELAY=5
+PROFILE="rpi-4"
+DFROBOT_PACKAGES='kmod-r8169 kmod-usb-dwc2 bcm27xx-userland'
+ADDITIONAL_PACKAGES="6in4 luci luci-ssl miniupnpd-nftables luci-app-upnp luci-app-sqm luci-app-wireguard"
 
-if [ ${NETWORK} -ne 0 ]; then
-    #Check for network connection, not needed if local images
-    HAS_IP=$(ifconfig wlan0 | grep "inet ")
-    while [ -z "${HAS_IP}" ]; do
-        sleep 10
-        HAS_IP=$(ifconfig wlan0 | grep "inet ")
-    done
-
-    #Mount directory specified in fstab, not needed if local images
-    mount | grep -q ${SLIDESHOW_PATH}
-    MOUNT_CHECK=$?
-    if [ ${MOUNT_CHECK} -ne 0 ]; then
-        mount ${SLIDESHOW_PATH}
-    fi
-fi
-
-#Start slideshow
-DISPLAY=:0.0 XAUTHORITY=/home/pi/.Xauthority feh -Z -F -Y -D ${DELAY} --auto-rotate ${SLIDESHOW_PATH}
+make -j$(nproc) image PROFILE="${PROFILE}" PACKAGES="${DFROBOT_PACKAGES} ${ADDITIONAL_PACKAGES}"
